@@ -1,0 +1,76 @@
+
+Drop procedure if exists SP_COUNT_USER;
+Create Procedure SP_COUNT_USER(IN uname VARCHAR(50), IN pwd VARCHAR(50), OUT count INT)
+Select count(*) into count from DATABASE_USER where username = uname and password = pwd;
+
+Drop procedure if exists SP_FIND_USER_ID;
+Create Procedure SP_FIND_USER_ID(IN uname VARCHAR(50), IN pwd VARCHAR(50), OUT uid INT)
+Select userID into uid from DATABASE_USER where username = uname and password = pwd;
+
+Drop procedure if exists SP_FIND_O_ID;
+Create Procedure SP_FIND_O_ID(IN orgName VARCHAR(70), OUT oID INT(10))
+Select organizationID into oID from ORGANIZATION where name = orgName;
+
+Drop procedure if exists SP_FIND_PERMISSION;
+Create Procedure SP_FIND_PERMISSION(IN uname VARCHAR(50), IN pwd VARCHAR(50), OUT perm INT)
+Select permission into perm from DATABASE_USER where username = uname and password = pwd;
+
+Drop procedure if exists SP_INSERT_USER;
+Create Procedure SP_INSERT_USER(IN firstName VARCHAR(70), IN lastName(70), IN uname VARCHAR(50), IN pwd VARCHAR(50), IN perm int(1), IN permSite int(1))
+insert into DATABASE_USER values (null, firstName, lastName, uname, pwd, perm, permsite);
+
+Drop procedure if exists SP_INSERT_CONTACT;
+Create Procedure SP_INSERT_CONTACT(IN firstName VARCHAR(70), IN lastName VARCHAR(70), IN client VARCHAR(3), IN donor VARCHAR(3), IN volunteer VARCHAR(3), IN dob VARCHAR(20), IN notes TEXT)
+insert into CONTACT values (null, firstName, lastName, client, donor, volunteer, dob, null, notes);
+
+Drop procedure if exists SP_INSERT_CONTACT_EMAIL;
+Create Procedure SP_INSERT_CONTACT_EMAIL(IN contactID INT(10), IN detail VARCHAR(30), IN email VARCHAR(40))
+insert into CONTACT_EMAIL values (contactID, detail, email);
+
+Drop procedure if exists SP_INSERT_CONTACT_ADDRESS;
+Create Procedure SP_INSERT_CONTACT_ADDRESS(IN contactID INT(10), IN contactDetail VARCHAR(30), IN City VARCHAR(30), IN State VARCHAR(30), IN Street VARCHAR(60), IN Apt INT(10), IN ZipCode INT(5))
+insert into CONTACT_ADDRESS values (contactID, contactDetail, City, State, Street, Apt, ZipCode);
+
+Drop procedure if exists SP_INSERT_CONTACT_PHONE;
+Create Procedure SP_INSERT_CONTACT_PHONE(IN contactID INT(10), IN Detail VARCHAR(30), IN PhoneNumber VARCHAR(20))
+insert into CONTACT_PHONE values (contactID, Detail, PhoneNumber);
+
+Drop procedure if exists SP_INSERT_CONTACT_O;
+Create Procedure SP_INSERT_CONTACT_O(IN firstName VARCHAR(70), IN lastName VARCHAR(70), IN client VARCHAR(3), IN donor VARCHAR(3), IN volunteer VARCHAR(3), IN dob VARCHAR(20), IN orgID INT(10), IN notes TEXT)
+insert into CONTACT values (null, firstName, lastName, client, donor, volunteer, dob, orgID, notes);
+
+Drop procedure if exists SP_INSERT_ORGANIZATION;
+Create Procedure SP_INSERT_ORGANIZATION(IN name VARCHAR(70), IN website VARCHAR(100))
+insert into ORGANIZATION values (null, name, website, null);
+
+Drop procedure if exists SP_INSERT_ORGANIZATION_ADDRESS;
+Create Procedure SP_INSERT_ORGANIZATION_ADDRESS(IN organizationID INT(10), IN City VARCHAR(30), IN State VARCHAR(30), IN Street VARCHAR(60), IN Zipcode INT(10))
+insert into ORGANIZATION_ADDRESS values (organizationID, City, State, Street, Zipcode);
+
+Drop procedure if exists SP_INSERT_ORGANIZATION_PHONE;
+Create Procedure SP_INSERT_ORGANIZATION_PHONE(IN organizationID INT(10), IN Detail VARCHAR(30), IN PhoneNumber VARCHAR(20))
+insert into ORGANIZATION_PHONE values (organizationID, Detail, PhoneNumber);
+
+Drop procedure if exists SP_INSERT_CONTACT_FILE;
+Create Procedure SP_INSERT_CONTACT_FILE(IN contactID INT(10), IN Detail VARCHAR(30), IN fileLink VARCHAR(100))
+insert into CONTACT_FILE values (contactID, Detail, fileLink);
+
+Drop procedure if exists SP_INSERT_ORGANIZATION_FILE;
+Create Procedure SP_INSERT_ORGANIZATION_FILE(IN organizationID INT(10), IN Detail VARCHAR(30), IN fileLink VARCHAR(100))
+insert into ORGANIZATION_FILE values (organizationID, Detail, fileLink);
+
+Drop procedure if exists SP_UPDATE_CONTACT;
+Create Procedure SP_UPDATE_CONTACT(IN updateContactID INT(10), IN updateFirstName VARCHAR(70), IN updateLastName VARCHAR(70), IN updateClient VARCHAR(3), IN updateDonor VARCHAR(3), IN updateVolunteer VARCHAR(3), IN updatedob VARCHAR(20), IN updateNotes TEXT)
+UPDATE CONTACT SET firstName = updateFirstName, lastName = updateLastName, client = updateClient, donor = updateDonor, volunteer = updateVolunteer, dateOfBirth = updatedob, contactNotes = updateNotes WHERE (contactID = updateContactID);
+
+Drop procedure if exists SP_UPDATE_CONTACT_O;
+Create Procedure SP_UPDATE_CONTACT_O(IN updateContactID INT(10), IN updateFirstName VARCHAR(70), IN updateLastName VARCHAR(70), IN updateClient VARCHAR(3), IN updateDonor VARCHAR(3), IN updateVolunteer VARCHAR(3), IN updatedob VARCHAR(20), IN orgID INT(10), IN updateNotes TEXT)
+UPDATE CONTACT SET firstName = updateFirstName, lastName = updateLastName, client = updateClient, donor = updateDonor, volunteer = updateVolunteer, dateOfBirth = updatedob, organizationID = orgID, contactNotes = updateNotes WHERE (contactID = updateContactID);
+
+Drop procedure if exists SP_UPDATE_ORGANIZATION;
+Create Procedure SP_UPDATE_ORGANIZATION(IN updateOID INT(10), IN updateName VARCHAR(70), IN updateSite VARCHAR(100), IN updateContact INT(10))
+UPDATE ORGANIZATION SET name = updateName, website = updateSite, primaryContactID = updateContact WHERE (organizationID = updateOID);
+
+Drop procedure if exists SP_UPDATE_USER;
+Create Procedure SP_UPDATE_USER(IN updateUserID INT(10), IN updateFirstName VARCHAR(70), IN updateLastName VARCHAR(70), IN updateEmail VARCHAR(70), IN updatePermission VARCHAR(100), IN updateSitePermission INT(10))
+UPDATE DATABASE_USER SET firstName = updateFirstName, lastName = updateLastName, username = updateEmail, permission = updatePermission, permissionSite = updateSitePermission WHERE (userID = updateUserID);
