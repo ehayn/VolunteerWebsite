@@ -1,0 +1,115 @@
+Create Or Replace view VW_TRAINING_EDIT As
+Select VOLUNTEER.VID, TRAINING.TID, VOLUNTEER.FirstName, VOLUNTEER.LastName, TRAINING.Title, TRAINING.Date, TRAINING.Notes
+From VOLUNTEER, TRAINING, ATTENDANCE
+Where ATTENDANCE.VID = VOLUNTEER.VID and ATTENDANCE.TID = TRAINING.TID;
+
+Create Or Replace view VW_VOLUNTEER_EDIT As
+Select VOLUNTEER.VID, VOLUNTEER.FirstName, VOLUNTEER.LastName, SPOUSE.SPFirstName, SPOUSE.SPLastName, VOLUNTEER.Email, VOLUNTEER.PhoneNumber, VOLUNTEER.StartDate, VOLUNTEER.EndDate, VOLUNTEER.BirthDate, VOLUNTEER.JobTitle, PICTURE.PicLink, VOLUNTEER.Notes, ADDRESS.Street, ADDRESS.City, ADDRESS.STATE, ADDRESS.ZipCode
+From VOLUNTEER, SPOUSE, ADDRESS, PICTURE
+Where VOLUNTEER.SID = SPOUSE.SID and VOLUNTEER.AI = ADDRESS.AI and VOLUNTEER.PID = PICTURE.PID;
+
+Create Or Replace view VW_INCIDENT_EDIT AS
+Select VOLUNTEER.VID, INCIDENTREPORT.IID, VOLUNTEER.FirstName, VOLUNTEER.LastName, INCIDENTREPORT.Date, INCIDENTREPORT.Report
+FROM VOLUNTEER, INCIDENTREPORT
+Where VOLUNTEER.VID = INCIDENTREPORT.Volunteer; 
+
+Create Or Replace view VW_VOLUNTEER As
+Select VOLUNTEER.VID, PICTURE.PicLink, VOLUNTEER.FirstName, VOLUNTEER.LastName, SPOUSE.SPFirstName, SPOUSE.SPLastName, VOLUNTEER.Email, VOLUNTEER.PhoneNumber, ADDRESS.Street, ADDRESS.City, ADDRESS.STATE, ADDRESS.ZipCode
+From VOLUNTEER, SPOUSE, ADDRESS, PICTURE
+Where VOLUNTEER.SID = SPOUSE.SID and VOLUNTEER.AI = ADDRESS.AI and VOLUNTEER.PID = PICTURE.PID;
+
+Create Or Replace view VW_TRAINING AS
+Select TRAINING.TID, TRAINING.Title, TRAINING.Date, VOLUNTEER.VID, VOLUNTEER.FirstName, VOLUNTEER.LastName
+From TRAINING, ATTENDANCE, VOLUNTEER
+Where ATTENDANCE.VID = VOLUNTEER.VID and ATTENDANCE.TID = TRAINING.TID;
+
+Create OR Replace view VW_INCIDENT AS
+Select INCIDENTREPORT.IID, VOLUNTEER.FirstName, VOLUNTEER.LastName, INCIDENTREPORT.Date, INCIDENTREPORT.Report
+From VOLUNTEER, INCIDENTREPORT
+Where VOLUNTEER.VID = INCIDENTREPORT.Volunteer;
+
+Drop procedure if exists SP_COUNT_VOLUNTEER;
+Create Procedure SP_COUNT_VOLUNTEER(IN fn VARCHAR(50), IN ln VARCHAR(50), IN em VARCHAR(50), OUT count INT)
+Select count(*) into count from VOLUNTEER where FirstName = fn and LastName = ln and Email = em;
+
+Drop procedure if exists SP_COUNT_SPOUSE;
+Create Procedure SP_COUNT_SPOUSE(IN fn VARCHAR(50), IN ln VARCHAR(50), OUT count INT)
+Select count(*) into count from SPOUSE where FirstName = fn and LastName = ln;
+
+Drop procedure if exists SP_INSERT_SPOUSE;
+Create Procedure SP_INSERT_SPOUSE(IN fn VARCHAR(50), IN ln VARCHAR(50))
+Insert into SPOUSE values(null, fn, ln);
+
+Drop procedure if exists SP_FIND_SPOUSE_ID;
+Create Procedure SP_FIND_SPOUSE_ID(IN fn VARCHAR(50), IN ln VARCHAR(50), OUT spid INT)
+Select SID into spid from SPOUSE where FirstName = fn and LastName = ln;
+
+Drop procedure if exists SP_COUNT_ADDRESS; 
+Create Procedure SP_COUNT_ADDRESS(IN ad VARCHAR(50), IN adc VARCHAR(50), IN ads VARCHAR(50), IN adz INT(5), OUT count INT)
+Select count(*) into count from ADDRESS where Street = ad and City = adc and State = ads and ZipCode = adz;
+
+Drop procedure if exists SP_INSERT_ADDRESS; 
+Create Procedure SP_INSERT_ADDRESS(IN ad VARCHAR(50), IN adc VARCHAR(50), IN ads VARCHAR(50), IN adz INT(5))
+Insert into ADDRESS values(null, ad, adc, ads, adz);
+
+Drop procedure if exists SP_FIND_ADDRESS_ID; 
+Create Procedure SP_FIND_ADDRESS_ID(IN ad VARCHAR(50), IN adc VARCHAR(50), IN ads VARCHAR(50), IN adz INT(5), OUT adi INT)
+Select AI into adi from ADDRESS where Street = ad and City = adc and State = ads and ZipCode = adz;
+
+Drop procedure if exists SP_INSERT_VOLUNTEER;
+Create Procedure SP_INSERT_VOLUNTEER(IN FirstName VARCHAR(50), IN LastName VARCHAR(50), IN SID INT(11), IN Email VARCHAR(50), IN PhoneNumber BIGINT(10), IN AI INT(11), IN StartDate DATE, IN EndDate DATE, IN BirthDate DATE, IN JobTitle VARCHAR(50), IN Picture VARCHAR(50), IN Notes TEXT)
+Insert into VOLUNTEER values(null, FirstName, LastName, SID, Email, PhoneNumber, AI, StartDate, EndDate, 0, BirthDate, JobTitle, Picture, Notes);
+
+Drop procedure if exists SP_COUNT_VOLUNTEER_TRAINING;
+Create Procedure SP_COUNT_VOLUNTEER_TRAINING(IN fn VARCHAR(50), IN ln VARCHAR(50), OUT count INT)
+Select count(*) into count from VOLUNTEER where FirstName = fn and LastName = ln;
+
+Drop procedure if exists SP_FIND_VOLUNTEER_ID;
+Create Procedure SP_FIND_VOLUNTEER_ID(IN fn VARCHAR(50), IN ln VARCHAR(50), OUT volid INT)
+Select VID into volid from VOLUNTEER where FirstName = fn and LastName = ln;
+
+Drop procedure if exists SP_COUNT_TRAINING;
+Create Procedure SP_COUNT_TRAINING(IN ti VARCHAR(50), OUT count INT)
+Select count(*) into count from TRAINING where Title = ti;
+
+Drop procedure if exists SP_FIND_TRAINING_ID;
+Create Procedure SP_FIND_TRAINING_ID(IN ti VARCHAR(50), OUT trainid INT)
+Select TID into trainid from TRAINING where Title = ti;
+
+Drop procedure if exists SP_COUNT_ATTENDANCE;
+Create Procedure SP_COUNT_ATTENDANCE(IN trid INT(11), IN void INT(11), OUT count INT)
+Select count(*) into count from ATTENDANCE where TID = trid and VID = void;
+
+Drop procedure if exists SP_INSERT_ATTENDANCE;
+Create Procedure SP_INSERT_ATTENDANCE(IN TID INT(11), IN VID INT(11))
+Insert into ATTENDANCE values(TID, VID);
+
+Drop procedure if exists SP_COUNT_INCIDENT;
+Create Procedure SP_COUNT_INCIDENT(IN vid INT(11), IN da DATE, OUT count INT)
+Select count(*) into count from INCIDENTREPORT where Volunteer = vid and Date = da;
+
+Drop procedure if exists SP_INSERT_INCIDENT;
+Create Procedure SP_INSERT_INCIDENT(IN Volunteer INT(11), IN Date DATE, IN Report TEXT)
+Insert into INCIDENTREPORT values(null, Volunteer, Date, Report);
+
+Drop procedure if exists SP_COUNT_ADMIN;
+Create Procedure SP_COUNT_ADMIN(IN fn VARCHAR(50), IN ln VARCHAR(50), IN em VARCHAR(50), OUT count INT)
+Select count(*) into count from DATABASE_USER where firstName = fn and lastName = ln and username = em;
+
+Drop procedure if exists SP_INSERT_ADMIN;
+Create Procedure SP_INSERT_ADMIN(IN fn VARCHAR(50), IN ln VARCHAR(50), IN em VARCHAR(50), IN pass VARCHAR(50))
+Insert into DATABASE_USER values(null, fn, ln, em, pass, 1, 0);
+
+Drop procedure if exists SP_VALIDATE_PASSWORD;
+Create Procedure SP_VALIDATE_PASSWORD(IN em VARCHAR(50), OUT pass VARCHAR(50))
+Select Password into pass from DATABASE_USER where username = em;
+
+Drop procedure if exists SP_UPDATE_PASSWORD;
+Create Procedure SP_UPDATE_PASSWORD(IN pass VARCHAR(50), IN em VARCHAR(50))
+UPDATE DATABASE_USER SET password = pass where username = em;
+
+Drop procedure if exists SP_INSERT_FILE;
+Create Procedure SP_INSERT_FILE(IN vid INT(11), IN link VARCHAR(50))
+Insert into FILES values(null, vid, link);
+
+
